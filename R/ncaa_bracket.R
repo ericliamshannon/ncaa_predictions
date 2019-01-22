@@ -1,17 +1,15 @@
 ## Created by: Eric William Shannon, PhD
 ## Date modified: 20190122
 
-setwd("~/Documents/ncaa_predictions")
-
 require(ggplot2)
 require(psych)
 require(dplyr)
 require(tibble)
 require(plotly)
 
-data2 <- openxlsx::read.xlsx("NCAA1819.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190121.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
-conf <- read.csv("teams.csv", header = FALSE)
+conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
 data2 <- data2[, -1]
 rownames(data2) <- gsub("NCAA", "", rownames(data2))
@@ -62,7 +60,7 @@ scores2 <-
 
 source(file = "error_predics.R", echo = FALSE)
 
-setwd("../..")
+setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
 
 rsconnect::deployApp("ncaa_bracket")
