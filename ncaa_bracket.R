@@ -1,9 +1,13 @@
+## Created by: Eric William Shannon, PhD
+## Date modified: 20190122
+
 setwd("~/Documents/ncaa_predictions")
 
-library(ggplot2)
-library(psych)
-library(dplyr)
-library(tibble)
+require(ggplot2)
+require(psych)
+require(dplyr)
+require(tibble)
+require(plotly)
 
 data2 <- openxlsx::read.xlsx("NCAA1819.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
@@ -56,7 +60,12 @@ scores2$simulated <- scale(scores2$simulated)
 scores2 <-
   scores2 %>% mutate_at(vars(OFFENSE, DEFENSE, simulated), funs(round(. , 4)))
 
-openxlsx::write.xlsx(scores2, file = "../ncaa_bracket/teams.xlsx")
+source(file = "error_predics.R", echo = FALSE)
 
 setwd("../..")
+openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
+
 rsconnect::deployApp("ncaa_bracket")
+
+
+
