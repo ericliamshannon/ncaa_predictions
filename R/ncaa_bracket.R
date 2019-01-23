@@ -5,9 +5,8 @@ require(ggplot2)
 require(psych)
 require(dplyr)
 require(tibble)
-require(plotly)
 
-data2 <- openxlsx::read.xlsx("../data/20190122.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190123.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
