@@ -1,7 +1,7 @@
 ## Created by: Eric William Shannon, PhD
 ## Date modified: 20190122
 
-errors <- openxlsx::read.xlsx("../workingdata/error_predics.xlsx", sheet = "Jan23")
+errors <- openxlsx::read.xlsx("../workingdata/error_predics.xlsx", sheet = "Jan24")
 errors$Home <- sub("^\\s+", "", errors$Home)
 errors$Home <- gsub("(^\\s+)|(\\s+$)", "", errors$Home)
 errors$Away <- sub("^\\s+", "", errors$Away)
