@@ -6,7 +6,7 @@ require(psych)
 require(dplyr)
 require(tibble)
 
-data2 <- openxlsx::read.xlsx("../data/20190125.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190126.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
