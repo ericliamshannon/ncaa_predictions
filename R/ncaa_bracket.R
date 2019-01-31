@@ -63,6 +63,3 @@ setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
 
 rsconnect::deployApp("ncaa_bracket")
-
-
-
