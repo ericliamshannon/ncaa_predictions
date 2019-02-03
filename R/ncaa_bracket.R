@@ -1,12 +1,12 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190130
+## Date modified: 20190202
 
 require(ggplot2)
 require(psych)
 require(dplyr)
 require(tibble)
 
-data2 <- openxlsx::read.xlsx("../data/20190130.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190202.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -56,8 +56,6 @@ scores2$simulated <- scale(scores2$simulated)
 
 scores2 <-
   scores2 %>% mutate_at(vars(OFFENSE, DEFENSE, simulated), funs(round(. , 4)))
-
-source(file = "error_predics.R", echo = FALSE)
 
 setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
