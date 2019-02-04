@@ -1,12 +1,13 @@
 ## Created by: Eric William Shannon, PhD
 ## Date modified: 20190202
 
+require(tidyverse)
 require(ggplot2)
+require(ggthemes)
 require(psych)
-require(dplyr)
-require(tibble)
 
-data2 <- openxlsx::read.xlsx("../data/20190202.xlsx", colNames = TRUE, startRow = 2)
+
+data2 <- openxlsx::read.xlsx("../data/20190203.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -40,8 +41,8 @@ conf$V1 <- gsub("(^\\s+)|(\\s+$)", "", conf$V1)
 
 scores2 <- merge(x = scores2, y = conf, by = 'V1', sort = FALSE, all.x = TRUE)
 
-conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + g + DEFENSE + OFFENSE + (1 | V2), data = scores2)
-scores2$simulated <- simulate(conference_effect, seed = 1, newdata = scores2, allow.new.levels = TRUE, re.form = NA)$sim_1
+conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + DEFENSE + OFFENSE + (1 | V2), data = scores2)
+scores2$simulated <- simulate(conference_effect, seed = 1, newdata = scores2, allow.new.levels = TRUE, re.form = NA, cond.sim = FALSE)$sim_1
 
 scores2 <- subset(scores2, select = c(V1, V2, OFFENSE, DEFENSE, simulated))
 
@@ -61,3 +62,12 @@ setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
 
 rsconnect::deployApp("ncaa_bracket")
+
+theme_set(theme_tufte())
+
+ggplot(scores2, aes(V2, simulated)) + 
+  geom_tufteboxplot() + theme(axis.text.x = element_text(angle = 65, vjust = 0.6)) +
+  labs(title = "NCAA Conferences",
+       caption = "Source: EWS",
+       x = "",
+       y = "Simulated Metric")
