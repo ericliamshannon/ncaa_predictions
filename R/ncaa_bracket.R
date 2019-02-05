@@ -7,7 +7,7 @@ require(ggthemes)
 require(psych)
 
 
-data2 <- openxlsx::read.xlsx("../data/20190203.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190204.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -71,3 +71,5 @@ ggplot(scores2, aes(V2, simulated)) +
        caption = "Source: EWS",
        x = "",
        y = "Simulated Metric")
+
+scores2 %>% filter(simulatedR <= 68) %>% ggplot(aes(OFFENSE, DEFENSE)) + geom_text(aes(label = team), check_overlap = TRUE)
