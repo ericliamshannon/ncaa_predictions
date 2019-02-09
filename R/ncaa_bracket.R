@@ -7,7 +7,7 @@ require(ggthemes)
 require(psych)
 
 
-data2 <- openxlsx::read.xlsx("../data/20190207.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190208.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -65,13 +65,12 @@ openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
 
 rsconnect::deployApp("ncaa_bracket")
 
-theme_set(theme_tufte())
-
 ggplot(scores2, aes(V2, simulated)) + 
-  geom_tufteboxplot() + theme(axis.text.x = element_text(angle = 65, vjust = 0.6)) +
+  geom_boxplot() + theme(axis.text.x = element_text(angle = 65, vjust = 0.6)) +
   labs(title = "NCAA Conferences",
        caption = "Source: EWS",
        x = "",
-       y = "Simulated Metric")
+       y = "Simulated Metric") + theme_wsj() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-scores2 %>% filter(simulatedR <= 68) %>% ggplot(aes(OFFENSE, DEFENSE)) + geom_text(aes(label = team), check_overlap = TRUE)
+scores2 %>% group_by(V2) %>% filter(simulatedR <= 68) %>% count(V2, sort = TRUE)
