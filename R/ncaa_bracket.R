@@ -1,5 +1,5 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190202
+## Date modified: 20190209
 
 require(tidyverse)
 require(ggplot2)
@@ -7,7 +7,7 @@ require(ggthemes)
 require(psych)
 
 
-data2 <- openxlsx::read.xlsx("../data/20190208.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190213.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -16,7 +16,8 @@ rownames(data2) <- gsub("NCAA", "", rownames(data2))
 data2 <- data2[(complete.cases(data2)), ]
 data2 <- janitor::clean_names(data2)
 
-offense_data <- data2 %>% select(tm, pace, o_rtg, f_tr, x3p_ar, ts_percent, trb_percent, ast_percent, e_fg_percent, ft_fga)
+offense_data <- data2 %>% 
+  select(tm, pace, o_rtg, f_tr, x3p_ar, ts_percent, trb_percent, ast_percent, e_fg_percent, ft_fga)
 
 pr_offense <- principal(offense_data, nfactors = 1, rotate = "varimax",
                         scores = TRUE, oblique.scores = FALSE, covar = TRUE)
@@ -43,8 +44,10 @@ conf$V1 <- gsub("(^\\s+)|(\\s+$)", "", conf$V1)
 
 scores2 <- scores2 %>% left_join(conf)
 
-conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + DEFENSE + OFFENSE + (1 | V2), data = scores2)
-scores2$simulated <- simulate(conference_effect, seed = 1, newdata = scores2, allow.new.levels = TRUE, re.form = NA, cond.sim = FALSE)$sim_1
+conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + DEFENSE + OFFENSE + (1 | V2), 
+                                data = scores2)
+scores2$simulated <- simulate(conference_effect, seed = 1, newdata = scores2, 
+                              allow.new.levels = TRUE, re.form = NA, cond.sim = FALSE)$sim_1
 
 scores2 <- scores2 %>% select(V1, V2, OFFENSE, DEFENSE, simulated)
 
@@ -58,7 +61,7 @@ scores2 <- scores2 %>%
 scores2$simulated <- scale(scores2$simulated)
 
 scores2 <-
-  scores2 %>% mutate_at(vars(OFFENSE, DEFENSE, simulated), funs(round(. , 4)))
+  scores2 %>% mutate_at(vars(OFFENSE, DEFENSE, simulated), funs(round(. , 3)))
 
 setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
@@ -70,7 +73,9 @@ ggplot(scores2, aes(V2, simulated)) +
   labs(title = "NCAA Conferences",
        caption = "Source: EWS",
        x = "",
-       y = "Simulated Metric") + theme_wsj() + 
+       y = "Simulated Metric") + theme_wsj() + scale_color_wsj() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-scores2 %>% group_by(V2) %>% filter(simulatedR <= 68) %>% count(V2, sort = TRUE)
+scores2 %>% group_by(V2) %>% 
+  filter(simulatedR <= 68) %>% 
+  count(V2, sort = TRUE)
