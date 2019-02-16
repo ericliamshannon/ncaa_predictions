@@ -7,7 +7,7 @@ require(ggthemes)
 require(psych)
 
 
-data2 <- openxlsx::read.xlsx("../data/20190213.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190215.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -75,7 +75,3 @@ ggplot(scores2, aes(V2, simulated)) +
        x = "",
        y = "Simulated Metric") + theme_wsj() + scale_color_wsj() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-scores2 %>% group_by(V2) %>% 
-  filter(simulatedR <= 68) %>% 
-  count(V2, sort = TRUE)
