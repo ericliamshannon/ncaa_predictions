@@ -8,7 +8,7 @@ require(psych)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190222.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190223.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
