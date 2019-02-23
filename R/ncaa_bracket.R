@@ -1,13 +1,14 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190209
+## Date modified: 20190223
 
 require(tidyverse)
 require(ggplot2)
 require(ggthemes)
 require(psych)
 
+`%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190215.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190222.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -73,5 +74,17 @@ ggplot(scores2, aes(V2, simulated)) +
   labs(title = "NCAA Conferences",
        caption = "Source: EWS",
        x = "",
-       y = "Simulated Metric") + theme_wsj() + scale_color_wsj() +
+       y = "Simulated Metric") + scale_color_fivethirtyeight() +
+  theme_fivethirtyeight() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+champs <- scores2 %>%
+  group_by(V2) %>% top_n(1, simulated)
+
+at_large <- scores2 %>% filter(team %!in% champs$team) %>%
+                               top_n(35, simulated)
+
+ncaa_predicts <- bind_rows(champs, at_large)
+
+ncaa_predicts %>% group_by(V2) %>% count(V2, sort = TRUE)
+
