@@ -1,5 +1,5 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190223
+## Date modified: 20190224
 
 require(tidyverse)
 require(ggplot2)
@@ -8,7 +8,7 @@ require(psych)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190223.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190224.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -80,11 +80,7 @@ ggplot(scores2, aes(V2, simulated)) +
 
 champs <- scores2 %>%
   group_by(V2) %>% top_n(1, simulated)
-
 at_large <- scores2 %>% filter(team %!in% champs$team) %>%
                                top_n(35, simulated)
-
 ncaa_predicts <- bind_rows(champs, at_large)
-
 ncaa_predicts %>% group_by(V2) %>% count(V2, sort = TRUE)
-
