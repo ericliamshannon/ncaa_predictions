@@ -8,7 +8,7 @@ require(psych)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190307.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190308.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -25,7 +25,7 @@ pr_offense <- principal(offense_data, nfactors = 1, rotate = "varimax",
 pr_offense <- as.data.frame(pr_offense$scores)
 names(pr_offense)[names(pr_offense) == "PC1"] <- "OFFENSE"
 
-defense_data <- data2 %>% select(stl_percent, blk_percent, tov_percent, orb_percent)
+defense_data <- data2 %>% select(opp, stl_percent, blk_percent, tov_percent, orb_percent)
 
 pr_defense <- principal(defense_data, nfactors = 1, rotate = "varimax",
                         scores = TRUE, oblique.scores = FALSE, covar = TRUE)
@@ -89,5 +89,4 @@ ggplot(ncaa_predicts, aes(team, simulated)) +
   geom_bar(stat = "identity", aes(fill = team)) +
   scale_color_fivethirtyeight() + theme_fivethirtyeight() +
   theme(legend.position = "none", 
-        axis.text.x = element_text(angle = 45, hjust = 1, size = 5)) +
-  geom_hline(yintercept = 1.298176, linetype = "dashed", alpha = 0.5)
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 5))
