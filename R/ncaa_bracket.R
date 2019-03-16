@@ -1,5 +1,5 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190307
+## Date modified: 20190314
 
 require(tidyverse)
 require(ggplot2)
@@ -8,7 +8,7 @@ require(psych)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190308.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190315.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
