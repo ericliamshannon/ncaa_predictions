@@ -8,7 +8,7 @@ require(psych)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190315.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190317.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -90,3 +90,7 @@ ggplot(ncaa_predicts, aes(team, simulated)) +
   scale_color_fivethirtyeight() + theme_fivethirtyeight() +
   theme(legend.position = "none", 
         axis.text.x = element_text(angle = 45, hjust = 1, size = 5))
+
+scores2 %>% filter(V2 == "SEC") %>% 
+  ggplot(., aes(simulated)) + geom_density() +
+  geom_vline(xintercept = c(2.337, 2.152), linetype = "dotted")
