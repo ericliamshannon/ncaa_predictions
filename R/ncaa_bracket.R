@@ -1,14 +1,15 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190314
+## Date modified: 20190407
 
 require(tidyverse)
 require(ggplot2)
 require(ggthemes)
 require(psych)
+library(tidyverse)
 
 `%!in%` <- negate(`%in%`)
 
-data2 <- openxlsx::read.xlsx("../data/20190317.xlsx", colNames = TRUE, startRow = 2)
+data2 <- openxlsx::read.xlsx("../data/20190407.xlsx", colNames = TRUE, startRow = 2)
 data2 <- data2[, -1]
 conf <- read.csv("../data/teams.csv", header = FALSE)
 rownames(data2) <- data2[, 1]
@@ -44,6 +45,7 @@ conf$V1 <- sub("^\\s+", "", conf$V1)
 conf$V1 <- gsub("(^\\s+)|(\\s+$)", "", conf$V1)
 
 scores2 <- scores2 %>% left_join(conf)
+scores3 <- scores2
 
 conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + DEFENSE + OFFENSE + (1 | V2), 
                                 data = scores2)
@@ -68,29 +70,3 @@ setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
 
 rsconnect::deployApp("ncaa_bracket")
-
-ggplot(scores2, aes(V2, simulated)) + 
-  geom_boxplot() + theme(axis.text.x = element_text(angle = 65, vjust = 0.6)) +
-  labs(title = "NCAA Conferences",
-       caption = "Source: EWS",
-       x = "",
-       y = "Simulated Metric") + scale_color_fivethirtyeight() +
-  theme_fivethirtyeight() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-champs <- scores2 %>%
-  group_by(V2) %>% top_n(1, simulated)
-at_large <- scores2 %>% filter(team %!in% champs$team) %>%
-                               top_n(35, simulated)
-ncaa_predicts <- bind_rows(champs, at_large)
-ncaa_predicts %>% group_by(V2) %>% count(V2, sort = TRUE)
-
-ggplot(ncaa_predicts, aes(team, simulated)) +
-  geom_bar(stat = "identity", aes(fill = team)) +
-  scale_color_fivethirtyeight() + theme_fivethirtyeight() +
-  theme(legend.position = "none", 
-        axis.text.x = element_text(angle = 45, hjust = 1, size = 5))
-
-scores2 %>% filter(V2 == "SEC") %>% 
-  ggplot(., aes(simulated)) + geom_density() +
-  geom_vline(xintercept = c(2.337, 2.152), linetype = "dotted")
