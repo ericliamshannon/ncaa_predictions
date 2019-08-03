@@ -3,8 +3,8 @@ library(openxlsx)
 
 scores2 <- read.xlsx("teams.xlsx", colNames = TRUE)
 scores2 <- setnames(scores2,
-                                old = c("team", "V2", "OFFENSE", "DEFENSE", "simulated", "simulatedR"),
-                                new = c("Team", "Conference", "Offense Score", "Defense Score", "Overall Score", "Overall Rank"))
+                                old = c("team", "V2", "OFFENSE", "DEFENSE", "estimate", "lower", "upper"),
+                                new = c("Team", "Conference", "Offense Score", "Defense Score", "Win Probability", "Lower CI", "Upper CI"))
 scores2 <- scores2[complete.cases(scores2), ]
 scores2 <- scores2[order(scores2$Conference, scores2$Team), ]
 
@@ -37,14 +37,7 @@ ui <- fluidPage(
                        "Team:",
                        c("All",
                          unique(as.character(scores2$Team))))
-    ),
-    column(4,
-           selectInput("Overall Rank",
-                       "Rank:",
-                       c("All",
-                         unique(as.character(scores2$`Overall Rank`))))
-    )
-  ),
+    )),
   # Create a new row for the table.
   DT::dataTableOutput("table")
 )
@@ -61,9 +54,6 @@ server <- function(input, output) {
     }
     if (input$Team != "All") {
       data <- data[data$Team == input$Team,]
-    }
-    if (input$`Overall Rank` != "All") {
-      data <- data[data$`Overall Rank` == input$`Overall Rank`,]
     }
     data
   }))

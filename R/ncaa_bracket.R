@@ -1,11 +1,13 @@
 ## Created by: Eric William Shannon, PhD
-## Date modified: 20190407
+## Date modified: 20190803
 
-require(tidyverse)
-require(ggplot2)
 require(ggthemes)
+require(lme4)
 require(psych)
-library(tidyverse)
+require(RCurl)
+require(rlist)
+require(tidyverse)
+require(XML)
 
 `%!in%` <- negate(`%in%`)
 
@@ -34,37 +36,35 @@ pr_defense <- as.data.frame(pr_defense$scores)
 names(pr_defense)[names(pr_defense) == "PC1"] <- "DEFENSE"
 
 scores2 <- as.data.frame(cbind(data2, pr_offense, pr_defense))
-scores2 <- scores2 %>% select(srs, w_l_percent, g, sos, OFFENSE, DEFENSE)
+scores2 <- scores2 %>% select(srs, w_l_percent, g, w, l, sos, OFFENSE, DEFENSE) %>% rownames_to_column('V1') %>% mutate(V1 = sub("^\\s+", "", V1)) %>% mutate(V1 = gsub("(^\\s+)|(\\s+$)", "", V1))
 
-scores2 <- scores2 %>% rownames_to_column('V1')
-scores2$V1 <- sub("^\\s+", "", scores2$V1)
-scores2$V1 <- gsub("(^\\s+)|(\\s+$)", "", scores2$V1)
-
-conf$V1 <- as.character(conf$V1)
-conf$V1 <- sub("^\\s+", "", conf$V1)
-conf$V1 <- gsub("(^\\s+)|(\\s+$)", "", conf$V1)
+conf <- conf %>% mutate(V1 = as.character(V1)) %>% mutate(V1 = sub("^\\s+", "", V1)) %>%
+  mutate(V1 = gsub("(^\\s+)|(\\s+$)", "", V1))
 
 scores2 <- scores2 %>% left_join(conf)
-scores3 <- scores2
 
-conference_effect <- lme4::lmer(srs ~ sos + w_l_percent + DEFENSE + OFFENSE + (1 | V2), 
-                                data = scores2)
-scores2$simulated <- simulate(conference_effect, seed = 1, newdata = scores2, 
-                              allow.new.levels = TRUE, re.form = NA, cond.sim = FALSE)$sim_1
+fit <- glmer(w/g ~ OFFENSE + DEFENSE + sos + srs + (1 | V2),
+             weights = g, nAGQ = 0, verbose = TRUE, data = scores2,
+             family = binomial(link = probit))
 
-scores2 <- scores2 %>% select(V1, V2, OFFENSE, DEFENSE, simulated)
+scores2$estimate <- merTools::predictInterval(merMod = fit,
+                                                  newdata = scores2, level = 0.95, n.sims = 1000,
+                                                  stat = "mean", type = "probability", 
+                                                  include.resid.var = FALSE, fix.intercept.variance = TRUE)$fit
+scores2$lower <- merTools::predictInterval(merMod = fit,
+                                               newdata = scores2, level = 0.95, n.sims = 1000,
+                                               stat = "mean", type = "probability", 
+                                               include.resid.var = FALSE, fix.intercept.variance = TRUE)$lwr
+scores2$upper <- merTools::predictInterval(merMod = fit,
+                                               newdata = scores2, level = 0.95, n.sims = 1000,
+                                               stat = "mean", type = "probability", 
+                                               include.resid.var = FALSE, fix.intercept.variance = TRUE)$upr
 
-scores2 <- scores2 %>%
-  mutate(simulatedR = dense_rank(desc(simulated))) %>%
-  column_to_rownames('V1')
 
-scores2 <- scores2 %>%
-  rownames_to_column('team')
-
-scores2$simulated <- scale(scores2$simulated)
-
-scores2 <-
-  scores2 %>% mutate_at(vars(OFFENSE, DEFENSE, simulated), funs(round(. , 3)))
+scores2 <- scores2 %>% select(V1, V2, OFFENSE, DEFENSE, estimate, lower, upper) %>%
+  column_to_rownames('V1') %>%
+  rownames_to_column('team') %>%
+  mutate_at(vars(OFFENSE, DEFENSE, estimate, lower, upper), funs(round(. , 3)))
 
 setwd("..")
 openxlsx::write.xlsx(scores2, file = "ncaa_bracket/teams.xlsx")
