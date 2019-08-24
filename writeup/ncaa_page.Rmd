@@ -1,0 +1,75 @@
+---
+title: About the Model
+author: Eric William Shannon, PhD
+date: August 23, 2019
+output:
+  rmarkdown::html_document:
+    theme: simplex
+---
+
+On this page I will describe the logic/methodology behind my NCAA Basketball model. If you are looking for direct access to the model please click [here](https://ericliamshannon.shinyapps.io/ncaa_bracket/).
+
+All data for my model comes from the "Advanced School Stats" page on [Sports Reference](https://www.sports-reference.com/cbb/seasons/2019-advanced-school-stats.html).
+
+## Generating the Model
+
+Overall, the model consists of three separate econometric models: two principal components analyses of a team's offensive and defensive capabilities followed by a generealized-linear mixed model predicting a team's overall win probability.
+
+### Principal Component Analysis
+
+Individuals interested in learning more about principal component analysis (PCA) should start with Vyas & Kumaranayake's (2006) review of the procedure which can be found [here](https://academic.oup.com/heapol/article/21/6/459/612115).
+
+For both a team's offensive and defensive capabilities, variables were selected based on my understanding of college basketball. The variables were **not** selected through a stepwise or related selection procedure.
+
+Varimax rotation was used for both the offensive and defensive scores.
+
+##### Offensive Capability
+
+To measure a team's offensive capability the following variables were included in the principal component analysis: *running total of season points, team pace, points scored per 100 possessions, free throw attempt rate, three point attempt rate, shooting efficiency, rebound percentage, assist percentage, field goal percentage, free throws per field goal attempt.*
+
+In the presence of another component for cross-loading, the one component solution explained 80% of variation in a team's offensive capability. Therefore, the offensive scores were extracted from the one component solution.
+
+##### Defensive Capability
+
+To measure a team's defensive capability the following variables were included in the principal component analysis: *opponents points, steal percentage, block percentage, turnover percentage, rebound percentage.*
+
+In the presence of another component for cross-loading, the one component solution explained 89% of variation in a team's defensive capability. Therefore, the defensive scores were extracted from the one component solution.
+
+### Generalized-linear Mixed Model
+
+Also referred to as hierarchical linear models and multilevel models, a mixed model approach addresses the statistical challenge of two teams belonging to the same conference being more similar – on average – than two randomly chosen teams.
+
+In order to generate a more accurate prediction, the following generalized-linear mixed model was estimated:
+
+<p align = "center"> 
+$y_{ij} = \beta_{0} + \beta_{1}x_{ij1} + \beta_{2}x_{ij2} + \beta_{3}x_{ij3} + \beta_{4}x_{ij4} + b_{j0} + \epsilon_{ij}$
+</p>
+
+where $y_{ij}$ is the winning probability for team $i$ in conference $j$; $x_{1}$ is the offensive capability of team $i$ in conference $j$; $x_{2}$ is a the defenseive capability of team $i$ in conference $j$; $x_{3}$ is the strength of schedule for team $i$ in conference $j$;
+$x_{4}$ is Sports Reference's simple rating system for team $i$ in conference $j$; $\beta_{0}$ is the fixed intercept term; $b_{j0}$ is a conference's random intercept; $\epsilon_{ij}$ is the error term.
+
+<table style="text-align:center"><caption><strong>GLMM Results</strong></caption>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td>Winning Probability</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Offensive Capability</td><td>0.264<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.071)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Defensive Capability</td><td>-0.150<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.049)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Strength of Schedule</td><td>-0.044<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.011)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Simple Rating System</td><td>0.039<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.009)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Constant</td><td>0.046<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.012)</td></tr>
+<tr><td style="text-align:left"></td><td></td></tr>
+<tr><td style="text-align:left">Observations</td><td>353</td></tr>
+<tr><td style="text-align:left">Log Likelihood</td><td>-750.279</td></tr>
+<tr><td style="text-align:left">Akaike Inf. Crit.</td><td>1,512.558</td></tr>
+<tr><td style="text-align:left">Bayesian Inf. Crit.</td><td>1,535.757</td></tr>
+<tr><td colspan="2" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Notes:</em></td><td style="text-align:left"><sup>***</sup>Significant at the 1 percent level.</td></tr>
+<tr><td style="text-align:left"></td><td style="text-align:left"><sup>**</sup>Significant at the 5 percent level.</td></tr>
+<tr><td style="text-align:left"></td><td style="text-align:left"><sup>*</sup>Significant at the 10 percent level.</td></tr>
+</table>
