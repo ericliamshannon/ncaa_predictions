@@ -1,12 +1,13 @@
-library(data.table)
-library(openxlsx)
+library(tidyverse)
+library(readxl)
 
-scores2 <- read.xlsx("teams.xlsx", colNames = TRUE)
-scores2 <- setnames(scores2,
-                                old = c("team", "V2", "OFFENSE", "DEFENSE", "estimate", "lower", "upper"),
-                                new = c("Team", "Conference", "Offense Score", "Defense Score", "Win Probability", "Lower CI", "Upper CI"))
-scores2 <- scores2[complete.cases(scores2), ]
-scores2 <- scores2[order(scores2$Conference, scores2$Team), ]
+collegeBasketball <- read_excel("teams.xlsx", col_names = TRUE) %>%
+  rename(Team = school, Conference = conf, `Win Probability` = estimate, `Lower 95%` = lower,
+         `Upper 95%` = upper) %>%
+  mutate(`Win Probability` = paste((`Win Probability`*100), "%", sep = ""),
+         `Lower 95%` = paste((`Lower 95%`*100), "%", sep = ""),
+          `Upper 95%` = paste((`Upper 95%`*100), "%", sep = "")) %>% 
+  arrange(Conference, Team)
 
 #
 # This is a Shiny web application. You can run the application by clicking
@@ -30,13 +31,13 @@ ui <- fluidPage(
            selectInput("Conference",
                        "Conference:",
                        c("All",
-                         unique(as.character(scores2$Conference))))
+                         unique(as.character(collegeBasketball$Conference))))
     ),
     column(4,
            selectInput("Team",
                        "Team:",
                        c("All",
-                         unique(as.character(scores2$Team))))
+                         unique(as.character(collegeBasketball$Team))))
     )),
   # Create a new row for the table.
   DT::dataTableOutput("table")
@@ -48,7 +49,7 @@ server <- function(input, output) {
   
   # Filter data based on selections
   output$table <- DT::renderDataTable(DT::datatable({
-    data <- scores2
+    data <- collegeBasketball
     if (input$Conference != "All") {
       data <- data[data$Conference == input$Conference,]
     }
@@ -62,4 +63,3 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-

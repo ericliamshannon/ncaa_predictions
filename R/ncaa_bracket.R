@@ -53,7 +53,7 @@ scores2 <- scores2 %>% left_join(conf)
 
 ## Mixed Effects Model
 
-fit <- glmer(w/g ~ OFFENSE + DEFENSE + sos + srs + (1 | V2),
+fit <- glmer(w/g ~ OFFENSE + DEFENSE + sos + (1 | V2),
              weights = g, nAGQ = 0, verbose = TRUE, data = scores2,
              family = binomial(link = probit))
 
