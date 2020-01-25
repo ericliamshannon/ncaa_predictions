@@ -1,6 +1,6 @@
 ## Author: Dr. Eric William Shannon
-## Date Edited: 20200112
-## Purpose: FBS Winning Probabilities
+## Date Edited: 20200125
+## Purpose: NCAA Winning Probabilities
 
 ## Cleaning the environment os I can load all of the packages
 ## that I need for this specific project. Creating the negative
@@ -58,22 +58,27 @@ fa.random(data = combinedTables[,15:33], nfactors = 3, fix = TRUE, rotate = "var
 
 myLavaan <- '
 
-            generalFactor =~ tm + opp + mp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + orb + ast + stl + blk + trb + fg
+            generalFactor =~ tm + opp + mp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + orb + ast + stl + blk + trb + fg + tov + pf
             factorOne =~ tm + opp + mp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + orb + trb + ast + stl + blk
-            factorThree =~ tm + fg + fg_percent + three_fg_percent + ft_percent + orb + tov + pf
+            factorThree =~ ast + tm + fg + fg_percent + three_fg_percent + ft_percent + orb + tov + pf
 
 
             generalFactor =~ 0*factorOne
             generalFactor =~ 0*factorThree
             factorOne =~ 0*factorThree
-
 '
 
 fit <- cfa(model = myLavaan, data = combinedTables, cluster = "conf", 
            std.lv = TRUE, std.ov = TRUE, auto.efa = TRUE, orthogonal = TRUE,
-           information = "expected", verbose = TRUE)
+           information = "expected", verbose = TRUE, mimic = "Mplus") 
 
-summary(fit, fit.measures = TRUE)
+### Checking parameter estimates and model fit.
+summary(fit, standardized = TRUE, fit.measures = TRUE)
+cov_table <- residuals(fit)$cov
+cov_table[upper.tri(cov_table)] <- NA
+print(cov_table)
+
+modindices(fit, sort. = TRUE)
 
 semPlot::semPaths(fit, what = c("paths", "est"), whatLabels = "est", layout = "spring", intercepts = FALSE, residuals = TRUE)
 
@@ -99,14 +104,14 @@ predictiveModel <- glmer(w_l_percent ~ srs + sos + ap_rank + factorOne +
                            factorThree + generalFactor + (1 | conf),
       family = binomial(link = "probit"), weights = games, data = combinedTables)
 
-## Binding predictive/confidence intervals onto the data frame
+s## Binding predictive/confidence intervals onto the data frame
 ## in order to get an idea of the uncertainty of a team's performance.
 ## Need to look into the residual variance vs. intercept variance.
 
 finalTables$estimate <- merTools::predictInterval(merMod = predictiveModel,
                                                   newdata = finalTables, level = 0.95, n.sims = 1000,
                                                   stat = "mean", type = "probability", 
-                                                  include.resid.var = FALSE, fix.intercept.variance = TRUE)$fit
+                                                  include.resid.var = TRUE, fix.intercept.variance = TRUE)$fit
 
 finalTables$lower <- merTools::predictInterval(merMod = predictiveModel,
                                                newdata = finalTables, level = 0.95, n.sims = 1000,
