@@ -1,5 +1,5 @@
 ## Author: Dr. Eric William Shannon
-## Date Edited: 20200125
+## Date Edited: 20200223
 ## Purpose: NCAA Winning Probabilities
 
 ## Cleaning the environment os I can load all of the packages
@@ -58,14 +58,17 @@ fa.random(data = combinedTables[,15:33], nfactors = 3, fix = TRUE, rotate = "var
 
 myLavaan <- '
 
-            generalFactor =~ tm + opp + mp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + orb + ast + stl + blk + trb + fg + tov + pf
-            factorOne =~ tm + opp + mp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + orb + trb + ast + stl + blk
-            factorThree =~ ast + tm + fg + fg_percent + three_fg_percent + ft_percent + orb + tov + pf
+            generalFactor =~ tm + opp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + ast + stl + blk + fg + orb + tov + pf
+            factorOne =~ tm + opp + fga + fg_percent + three_fg + three_fg_percent + ft_percent + ast + stl + blk + fg
+            factorThree =~ tm + fg + orb + tov + pf
 
 
             generalFactor =~ 0*factorOne
             generalFactor =~ 0*factorThree
             factorOne =~ 0*factorThree
+
+            three_fg ~~ three_fg_percent
+
 '
 
 fit <- cfa(model = myLavaan, data = combinedTables, cluster = "conf", 
@@ -104,14 +107,14 @@ predictiveModel <- glmer(w_l_percent ~ srs + sos + ap_rank + factorOne +
                            factorThree + generalFactor + (1 | conf),
       family = binomial(link = "probit"), weights = games, data = combinedTables)
 
-s## Binding predictive/confidence intervals onto the data frame
+## Binding predictive/confidence intervals onto the data frame
 ## in order to get an idea of the uncertainty of a team's performance.
 ## Need to look into the residual variance vs. intercept variance.
 
 finalTables$estimate <- merTools::predictInterval(merMod = predictiveModel,
                                                   newdata = finalTables, level = 0.95, n.sims = 1000,
                                                   stat = "mean", type = "probability", 
-                                                  include.resid.var = TRUE, fix.intercept.variance = TRUE)$fit
+                                                  include.resid.var = FALSE, fix.intercept.variance = TRUE)$fit
 
 finalTables$lower <- merTools::predictInterval(merMod = predictiveModel,
                                                newdata = finalTables, level = 0.95, n.sims = 1000,

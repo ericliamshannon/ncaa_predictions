@@ -4,10 +4,7 @@ library(readxl)
 collegeBasketball <- read_excel("teams.xlsx", col_names = TRUE) %>%
   rename(Team = school, Conference = conf, `Win Probability` = estimate, `Lower 95%` = lower,
          `Upper 95%` = upper) %>%
-  mutate(`Win Probability` = paste((`Win Probability`*100), "%", sep = ""),
-         `Lower 95%` = paste((`Lower 95%`*100), "%", sep = ""),
-          `Upper 95%` = paste((`Upper 95%`*100), "%", sep = "")) %>% 
-  arrange(Conference, Team)
+  arrange(desc(`Win Probability`), Team, Conference)
 
 #
 # This is a Shiny web application. You can run the application by clicking
